@@ -6,16 +6,16 @@ const path= require('path');
 
 //http logger
 app.use(morgan('combined'))
-//temple engine
+
 
 app.set('view engine','hbs')
+app.use(express.urlencoded({ extended: true }))
 
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')))
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
 app.use('/js', express.static(path.join(__dirname, 'node_modules/jquery/dist')))
 
 
-app.use(express.urlencoded({ extended: true }))
 
 app.get('/',async (req, res)=>{
      var result = await getAll("Products")
@@ -82,8 +82,6 @@ app.get('/edit/:id', async (req, res) => {
      //hien thi ra de sua
      res.render("edit", { product: productToEdit })
  })
- 
-
 app.get('/addproduct',  (req, res) => {
     res.render('insert')
 })
@@ -95,9 +93,16 @@ app.post('/update', async (req, res) => {
      const image = req.body.txtImage
      const category = req.body.txtCategory
      let updateValues = { $set: { name: name, price: price,category:category,image: image }};
-     await updateDocument(id, updateValues, "Products")
-     res.redirect('/')
-});
+     if(image.endsWith('png')==false){
+
+        res.render('edit',{errorLink:'enter link again!!'})
+    }
+    else{
+       await updateDocument(id, updateValues, "Products")
+       res.redirect('/')
+    }
+    
+})
 
 
 const PORT= process.env.PORT || 5000;
